@@ -12,44 +12,45 @@ void main() {
   runApp(
     MaterialApp(
       title: 'Flutter Demo',
-      theme: ThemeData(        
+      theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
       home: const HomePage(),
       routes: {
-        '/login/':(context) => const LoginView(),
-        '/register/':(context) => const RegisterView(),
+        '/login/': (context) => const LoginView(),
+        '/register/': (context) => const RegisterView(),
+        '/notes/': (context) => const NotesView(),
       },
     ),
   );
 }
 
 class HomePage extends StatelessWidget {
-  const HomePage({ Key? key }) : super(key: key);
+  const HomePage({Key? key}) : super(key: key);
 
-@override
+  @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-        future: Firebase.initializeApp(
-          options: DefaultFirebaseOptions.currentPlatform,
-        ),
-        builder: (context, snapshot) {
-          switch (snapshot.connectionState) {            
+      future: Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      ),
+      builder: (context, snapshot) {
+        switch (snapshot.connectionState) {
           case ConnectionState.done:
-             final user = FirebaseAuth.instance.currentUser;
-             if(user != null){
-               if (user.emailVerified){
-                 return const NotesView();
-               } else {
-                 return const VerifyEmailView();
-               } 
+            final user = FirebaseAuth.instance.currentUser;
+            if (user != null) {
+              if (user.emailVerified) {
+                return const NotesView();
+              } else {
+                return const VerifyEmailView();
+              }
             } else {
-               return const LoginView();
-             }
-          default: 
-          return const CircularProgressIndicator();
-      }          
-     },
+              return const LoginView();
+            }
+          default:
+            return const CircularProgressIndicator();
+        }
+      },
     );
   }
 }
@@ -57,7 +58,7 @@ class HomePage extends StatelessWidget {
 enum MenuAction { logout }
 
 class NotesView extends StatefulWidget {
-  const NotesView({ Key? key }) : super(key: key);
+  const NotesView({Key? key}) : super(key: key);
 
   @override
   _NotesViewState createState() => _NotesViewState();
@@ -70,28 +71,26 @@ class _NotesViewState extends State<NotesView> {
       appBar: AppBar(
         title: const Text('Main UI'),
         actions: [
-          PopupMenuButton<MenuAction>
-          (onSelected: (value) async {
-            switch (value){
-              case MenuAction.logout:
-              final shouldLogout = await showLogOutDialog(context);
-                if (shouldLogout){
-                  await FirebaseAuth.instance.signOut();
-                  Navigator.of(context).pushNamedAndRemoveUntil(
-                    '/login/',
-                   (_) => false
-                  );
-                }
-            }
-          },
-          itemBuilder: (context) {
-            return const [
-              PopupMenuItem<MenuAction>(
-                value: MenuAction.logout,
-                child: Text('Logout'),
-              ),
-            ];
-          },
+          PopupMenuButton<MenuAction>(
+            onSelected: (value) async {
+              switch (value) {
+                case MenuAction.logout:
+                  final shouldLogout = await showLogOutDialog(context);
+                  if (shouldLogout) {
+                    await FirebaseAuth.instance.signOut();
+                    Navigator.of(context)
+                        .pushNamedAndRemoveUntil('/login/', (_) => false);
+                  }
+              }
+            },
+            itemBuilder: (context) {
+              return const [
+                PopupMenuItem<MenuAction>(
+                  value: MenuAction.logout,
+                  child: Text('Logout'),
+                ),
+              ];
+            },
           )
         ],
       ),
@@ -100,22 +99,26 @@ class _NotesViewState extends State<NotesView> {
   }
 }
 
-Future<bool> showLogOutDialog(BuildContext context){
+Future<bool> showLogOutDialog(BuildContext context) {
   return showDialog<bool>(
     context: context,
-    builder: (context){
+    builder: (context) {
       return AlertDialog(
         title: const Text('Sing out'),
         content: const Text('Are you sure you want to sing out'),
         actions: [
-          TextButton(onPressed: (){
-            Navigator.of(context).pop(false);
-          }, 
-          child:  const Text('Cancel'),),
-          TextButton(onPressed: (){
-            Navigator.of(context).pop(true);
-          }, 
-          child:  const Text('Log out'),)
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(false);
+            },
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(true);
+            },
+            child: const Text('Log out'),
+          )
         ],
       );
     },
